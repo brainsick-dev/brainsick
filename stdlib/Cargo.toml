@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "stdlib"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["staticlib", "lib"]
+
+[dependencies]
+ty = {
+    path = "../ty"
+}
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = {
+    version = "0.11.1",
+    package = "gtk4",
+    features = ["v4_14"]
+}
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-core-foundation = "0.3.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = {
+    version = "0.61.2",
+    features = ["Win32_UI_WindowsAndMessaging"]
+}

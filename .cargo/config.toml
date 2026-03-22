@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[target.'cfg(all(windows, target_env = "msvc"))']
+# Using lld is convenient because if we use Bash on GitHub Actions,
+# MinGW link.exe takes precedence over MSVC link.exe. This is due to PATH.
+# The two links are incompatible, and Cargo would fail to link our application.
+#
+# Besides, lld may be faster than MSVC link.exe.
+linker = "rust-lld"

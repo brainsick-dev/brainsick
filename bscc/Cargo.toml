@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "bscc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+codegen = {
+    path = "../codegen"
+}
+hir = {
+    path = "../hir"
+}
+link = {
+    path = "../link"
+}
+stdlib = {
+    path = "../stdlib"
+}
+syntax = {
+    path = "../syntax"
+}
+target-lexicon = "0.13.5"
+ty = {
+    path = "../ty"
+}

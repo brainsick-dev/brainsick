@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: © 2026 Iain Nicol
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+// Module =
+//     VersionStmt
+//     Begin*
+
+// VersionStmt = 'VERSION' '@double'
+
+// MemberAccessExpr = NameRef '.' NameRef
+
+// Name = '#ident'
+
+// NameRef = '#ident'
+
+// BeginStmt = 'Begin' MemberAccessExpr NameRef
+
+// EndStmt = 'End'
+
+// Literal = '@double'
+
+// PropertyAssignment = Name '=' Literal
+
+// Begin = BeginStmt
+//     fields:(PropertyAssignment | Begin | BeginProperty )*
+// EndStmt
+
+// BeginProperty = BeginPropertyStmt
+//     fields:PropertyAssignment*
+// EndPropertyStmt
+
+// BeginPropertyStmt = 'BeginProperty' Name
+
+// EndPropertyStmt = 'EndProperty'
+
+// // list of:
+// // a = b
+// // beginproperty
+// // or recursive
+
+// FIXME: once support alternation on module item with conversions
+// But can't do this just yet because need the conversion - moduleitem isn't explicit in the cst
+// BasFile = ModuleItem*
+BasFile = SubBlock*
+
+ModuleItem = SubBlock
+
+// TODO: where do the EOLs go? inside the stmt or inside the block?
+// I guess that'll be the nice thing about using ungrammar, is that
+// the codegen will deal with modifying the ast structs.
+SubStmt = 'Sub' Name ParamList 'eol' // TODO paramlist
+EndSubStmt = 'End' 'Sub' 'eol'
+// TODO: do I want to rename this Sub? cf sub_block getter method name
+SubBlock = SubStmt StmtList EndSubStmt
+
+Name = '#ident'
+NameRef = '#ident'
+
+ParamList = Param*
+
+// TODO: As Type
+Param = Name ','?
+
+StmtList = Stmt*
+
+Stmt = ImplicitCallStmt | ExplicitCallStmt
+
+ImplicitCallStmt = NameRef ArgList
+
+ExplicitCallStmt = 'Call' NameRef '(' ArgList ')'
+
+ArgList = Arg*
+
+// TODO: confirm we want the comma to be part of Arg (not ArgList).
+// Similarly for Param, Stmt. Need parser to be consistent!
+Arg = Expr ','?
+
+Expr = LiteralExpr | BinExpr
+
+LiteralExpr = '@string'
+
+// FIXME: this isn't right, but I wanted Expr to be an Enum.
+// TODO: Need to be able to name lhs and rhs, and possibly the op (which I'll need to lex)
+BinExpr = Expr

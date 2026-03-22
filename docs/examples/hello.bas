@@ -1,0 +1,9 @@
+' SPDX-FileCopyrightText: © 2026 Iain Nicol
+'
+' SPDX-License-Identifier: AGPL-3.0-or-later
+
+Sub Main()
+
+    MsgBox "Hello, world!"
+
+End Sub

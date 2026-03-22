@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[workspace]
+resolver = "3"
+members = [
+    "bscc",
+    "codegen",
+    "hir",
+    "link",
+    "stdlib",
+    "syntax",
+    "ty"
+]
+
+[workspace.package]
+version = "0.3.0"
+edition = "2024"
+license = "AGPL-3.0-or-later"

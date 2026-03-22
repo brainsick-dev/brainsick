@@ -1,0 +1,117 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+    tags: ["v*.*.*"]
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  RUST_VERSION: 1.94.0
+  LLVM_VERSION: 21.1.8
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, macos-26, windows-2025-vs2026]
+    runs-on: ${{ matrix.runner }}
+
+    permissions:
+      contents: write # For creating/uploading the release
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Activate MSVC environment (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: ${{ runner.arch }}
+
+      - name: Set Rust version
+        run: rustup default ${{ env.RUST_VERSION }}
+
+      - name: Download LLVM binaries
+        run: |
+          url="$(echo "https://github.com/brainsick-dev/llvm-build/releases/download/v${{ env.LLVM_VERSION }}/llvm-${{ runner.os }}-${{ runner.arch }}-v${{ env.LLVM_VERSION }}.tar.zst" | tr '[:upper:]' '[:lower:]')"
+          archivePath="$(basename "$url")"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location "$url" -o "$archivePath"
+          mkdir llvm/
+          tar -x -f "$archivePath" -C llvm/
+
+      - name: Add llvm-config to PATH
+        run: echo "${{ github.workspace }}/llvm/bin" >> $GITHUB_PATH
+
+      - name: Install GTK (Linux)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev
+
+      - name: Build
+        run: cargo build --locked --release
+
+      # - name: Run tests
+      #   # TODO: cargo nextest?
+      #   run: cargo test --locked
+
+      - name: Archive
+        id: archive
+        run: |
+          if [ "${{ github.ref_type }}" == "tag" ]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="$(git rev-parse --short HEAD)"
+          fi
+          ARCHIVE_FILENAME="$(echo "bscc-${{ runner.os }}-${{ runner.arch }}-$VERSION.tar.xz" | tr '[:upper:]' '[:lower:]')"
+          cp "llvm/bin/${{ env.LLD_BASENAME }}${{ env.EXE_EXT }}" "brainsick-${{ env.LLD_BASENAME }}${{ env.EXE_EXT }}"
+          tar --create --file - "brainsick-${{ env.LLD_BASENAME }}${{ env.EXE_EXT }}" -C target/release/ bscc${{ env.EXE_EXT }} | xz -2 > "$ARCHIVE_FILENAME"
+          echo "ARCHIVE_FILENAME=$ARCHIVE_FILENAME" >> "$GITHUB_ENV"
+        env:
+          EXE_EXT: ${{ case(runner.os == 'Windows', '.exe', '') }}
+          LLD_BASENAME: ${{ case(runner.os == 'Linux', 'ld.lld', runner.os == 'macOS', 'ld64.lld', runner.os == 'Windows', 'lld-link', 'unknown-lld') }}${{ env.EXE_EXT }}
+
+      - uses: actions/upload-artifact@v7
+        name: Upload artifacts
+        if: ${{ github.ref_type != 'tag' }}
+        with:
+          path: ${{ env.ARCHIVE_FILENAME }}
+          if-no-files-found: error
+          archive: false
+
+      - name: Upload to release
+        if: ${{ github.ref_type == 'tag' }}
+        uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          artifacts: ${{ env.ARCHIVE_FILENAME }}
+          artifactErrorsFailBuild: true
+
+  publish:
+    if: ${{ github.ref_type == 'tag' }}
+    needs: build
+
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write # For publishing the release
+
+    steps:
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          body: ${{ github.ref_name }}

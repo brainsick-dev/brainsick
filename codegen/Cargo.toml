@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "codegen"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+hir = {
+    path = "../hir"
+}
+inkwell = {
+    version = "0.8.0",
+    default-features = false,
+    features = ["llvm21-1", "target-x86", "target-aarch64"]
+}
+target-lexicon = "0.13.5"

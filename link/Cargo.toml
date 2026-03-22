@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "link"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+target-lexicon = "0.13.5"

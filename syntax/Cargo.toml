@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "syntax"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cstree = {
+    version = "0.13.0",
+    features = ["derive"]
+}
+encoding_rs = "0.8.35"
+itertools = "0.14.0"
+logos = "0.16.1"
+
+[build-dependencies]
+cruet = "0.15.0"
+prettyplease = "0.2.37"
+proc-macro2 = "1.0.106"
+quote = "1.0.45"
+syn = "2.0.117"
+ungrammar = "1.16.1"

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: © 2026 Iain Nicol
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[package]
+name = "hir"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+syntax = {
+    path = "../syntax"
+}
+ty = {
+    path = "../ty"
+}
